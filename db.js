@@ -32,10 +32,13 @@ export async function initDB(retries = 50, delay = 3000) {
       console.log("✅ Couchbase connected");
       return scope;
     } catch (err) {
+      
       console.error(`❌ Couchbase connection failed (attempt ${attempt}/${retries}):`, err.message);
 
       if (attempt < retries) {
         console.log(`⏳ Retrying in ${delay / 1000}s...`);
+        console.log("COUCHBASE_CONN_STRING:", process.env.COUCHBASE_CONN_STRING);
+        console.log("IMAGEKIT_URL_ENDPOINT:", process.env.IMAGEKIT_URL_ENDPOINT);
         await new Promise(res => setTimeout(res, delay));
       } else {
         console.error("🚨 Max retries reached. Exiting...");
