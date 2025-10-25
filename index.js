@@ -12,7 +12,22 @@ import { initDB, getCollection, imagekit, getCluster } from "./db.js";
 
 dotenv.config();
 const app = express();
-app.use(cors({ origin: true, credentials: true }));
+//app.use(cors({ origin: true, credentials: true }));
+const allowedOrigins = [
+  "https://footballhubofficial.netlify.app", // your frontend
+  "http://localhost:3000" // for local testing
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
 app.use(fileUpload());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
