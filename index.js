@@ -18,26 +18,27 @@ const allowedOrigins = [
   "http://localhost:3000"
 ];
 
-// ✅ Configure CORS properly
+// ✅ Best possible CORS config for Safari/iOS/Netlify
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
+
   res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  // ✅ Handle preflight requests (important for Safari)
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // important for Safari/iPhone
+    return res.sendStatus(200);
   }
+
   next();
 });
-
-
-
-
-
-
 
 app.use(fileUpload());
 app.use(express.json());
