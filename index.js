@@ -313,7 +313,7 @@ app.post("/login", async (req, res) => {
 
 // Logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
+  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "None" });
   res.json({ message: "Logged out successfully" });
 });
 
