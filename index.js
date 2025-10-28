@@ -12,33 +12,8 @@ import { initDB, getCollection, imagekit, getCluster } from "./db.js";
 
 dotenv.config();
 const app = express();
-//app.use(cors({ origin: true, credentials: true }));
-const allowedOrigins = [
-  "https://footballhubofficial.netlify.app",
-  "http://localhost:3000"
-];
+app.use(cors({ origin: true, credentials: true }));
 
-// ✅ Best possible CORS config for Safari/iOS/Netlify
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-
-  // ✅ Handle preflight requests (important for Safari)
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
 
 app.use(fileUpload());
 app.use(express.json());
