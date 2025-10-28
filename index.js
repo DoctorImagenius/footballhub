@@ -291,14 +291,14 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign(
       { email: player.email, role: player.role },
       process.env.SECRET_KEY,
-      { expiresIn: "1d" } // 1 day
+      { expiresIn: "7d" } // 🔹 7 days
     );
 
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "None",
       secure: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 🔹 7 days in milliseconds
     });
 
     res.json({ message: "Login successful", token, data: player });
