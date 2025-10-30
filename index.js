@@ -2799,6 +2799,55 @@ app.delete("/players/:email/notifications/:notifId", authMiddleware, async (req,
   }
 });
 
+// 📢 Send Notification to All Players (Admin or System)
+app.post("/notify/all", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { title, message } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing title or message.",
+      });
+    }
+
+    // ✅ Couchbase cluster & query
+    const cluster = getCluster();
+    const query = `
+      SELECT p.email 
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`players\` AS p
+      WHERE p.email IS NOT NULL
+    `;
+
+    const result = await cluster.query(query);
+    const playerEmails = result.rows.map(row => row.email);
+
+    if (!playerEmails.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No players found to send notifications.",
+      });
+    }
+
+    // ✅ Send notification to each player
+    for (const email of playerEmails) {
+      await sendNotification(email, { title, message });
+    }
+
+    res.json({
+      success: true,
+      message: `✅ Notification sent to ${playerEmails.length} players successfully.`,
+    });
+
+  } catch (err) {
+    console.error("❌ Send All Notifications Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error while sending notifications to all players.",
+    });
+  }
+});
+
 // Push Player Notification (Self only)
 app.post("/notify/:email", authMiddleware, async (req, res) => {
   try {
