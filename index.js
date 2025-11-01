@@ -1843,7 +1843,7 @@ app.put("/profile/requests/:teamId", authMiddleware, async (req, res) => {
 
 // ====== Team Chat System ======
 
-// ✅ Get Last 10 Messages (Team Chat)
+// ✅ Get Last 20 Messages (Team Chat)
 app.get("/teams/:teamId/chat", authMiddleware, async (req, res) => {
   try {
     const { teamId } = req.params;
@@ -1862,7 +1862,7 @@ app.get("/teams/:teamId/chat", authMiddleware, async (req, res) => {
       FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`messages\` m
       WHERE m.teamId = $teamId
       ORDER BY m.timestamp DESC
-      LIMIT 10;
+      LIMIT 20;
     `;
     const result = await getCluster().query(query, { parameters: { teamId } });
 
@@ -1904,7 +1904,7 @@ app.post("/teams/:teamId/chat", authMiddleware, async (req, res) => {
 
     await messages.insert(newMsg.id, newMsg);
 
-    // Delete old messages if >10
+    // Delete old messages if >20
     const countQuery = `
       SELECT META(m).id, m.timestamp
       FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`messages\` m
@@ -1913,8 +1913,8 @@ app.post("/teams/:teamId/chat", authMiddleware, async (req, res) => {
     `;
     const all = await getCluster().query(countQuery, { parameters: { teamId } });
 
-    if (all.rows.length > 10) {
-      const toDelete = all.rows.slice(0, all.rows.length - 10);
+    if (all.rows.length > 20) {
+      const toDelete = all.rows.slice(0, all.rows.length - 20);
       for (const d of toDelete) {
         await messages.remove(d.id);
       }
