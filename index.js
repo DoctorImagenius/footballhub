@@ -1841,6 +1841,92 @@ app.put("/profile/requests/:teamId", authMiddleware, async (req, res) => {
   }
 });
 
+// ====== Team Chat System ======
+
+// ✅ Get Last 10 Messages (Team Chat)
+app.get("/teams/:teamId/chat", authMiddleware, async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const teams = getCollection("teams");
+    const messages = getCollection("messages");
+
+    const teamDoc = await teams.get(teamId).catch(() => null);
+    if (!teamDoc) return res.status(404).json({ success: false, message: "Team not found" });
+
+    const team = teamDoc.content;
+    if (!team.teamPlayers.includes(req.user.email))
+      return res.status(403).json({ success: false, message: "You are not a team member" });
+
+    const query = `
+      SELECT m.*
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`messages\` m
+      WHERE m.teamId = $teamId
+      ORDER BY m.timestamp DESC
+      LIMIT 10;
+    `;
+    const result = await getCluster().query(query, { parameters: { teamId } });
+
+    res.json({
+      success: true,
+      data: result.rows.reverse() // reverse to show oldest → newest
+    });
+  } catch (err) {
+    console.error("❌ Get Chat Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// ✅ Send Message
+app.post("/teams/:teamId/chat", authMiddleware, async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const { message } = req.body;
+    if (!message || message.trim() === "")
+      return res.status(400).json({ success: false, message: "Message required" });
+
+    const teams = getCollection("teams");
+    const messages = getCollection("messages");
+
+    const teamDoc = await teams.get(teamId).catch(() => null);
+    if (!teamDoc) return res.status(404).json({ success: false, message: "Team not found" });
+
+    const team = teamDoc.content;
+    if (!team.teamPlayers.includes(req.user.email))
+      return res.status(403).json({ success: false, message: "You are not a team member" });
+
+    const newMsg = {
+      id: uuidv4(),
+      teamId,
+      sender: req.user.email,
+      message: message.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    await messages.insert(newMsg.id, newMsg);
+
+    // Delete old messages if >10
+    const countQuery = `
+      SELECT META(m).id, m.timestamp
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`messages\` m
+      WHERE m.teamId = $teamId
+      ORDER BY m.timestamp ASC;
+    `;
+    const all = await getCluster().query(countQuery, { parameters: { teamId } });
+
+    if (all.rows.length > 10) {
+      const toDelete = all.rows.slice(0, all.rows.length - 10);
+      for (const d of toDelete) {
+        await messages.remove(d.id);
+      }
+    }
+
+    res.json({ success: true, message: "Message sent" });
+  } catch (err) {
+    console.error("❌ Send Chat Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // ---- Trophies CRUD ----
 
 // 1️⃣ Get All Trophies (Public)
