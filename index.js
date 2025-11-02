@@ -337,7 +337,7 @@ app.get("/profile", authMiddleware, async (req, res) => {
 });
 
 // ✅ Update Profile
-app.put("/profile", authMiddleware, async (req, res) => {
+app.post("/profile", authMiddleware, async (req, res) => {
   try {
     const players = getCollection("players");
     const player = await players.get(req.user.email);
@@ -403,7 +403,7 @@ app.put("/profile", authMiddleware, async (req, res) => {
 });
 
 // ✅ Delete Profile (cleanup too)
-app.delete("/profile", authMiddleware, async (req, res) => {
+app.post("/profile", authMiddleware, async (req, res) => {
   try {
     const players = getCollection("players");
     const sellItems = getCollection("sellItems");
@@ -824,7 +824,7 @@ app.get("/sell-items/:email", async (req, res) => {
 });
 
 // 5️⃣ Delete Sell Item (Auth)
-app.delete("/sell-items/:id", authMiddleware, async (req, res) => {
+app.post("/sell-items/:id", authMiddleware, async (req, res) => {
   try {
     const itemId = req.params.id;
     const sellItems = getCollection("sellItems");
@@ -1038,7 +1038,7 @@ app.post("/trainer", authMiddleware, async (req, res) => {
 });
 
 // 3️⃣ Update Trainer Profile (Auth)
-app.put("/trainer", authMiddleware, async (req, res) => {
+app.post("/trainer", authMiddleware, async (req, res) => {
   try {
     const trainers = getCollection("trainers");
     const existing = await trainers.get(req.user.email).catch(() => null);
@@ -1066,7 +1066,7 @@ app.put("/trainer", authMiddleware, async (req, res) => {
 });
 
 // 4️⃣ Delete Trainer Profile (Auth)
-app.delete("/trainer", authMiddleware, async (req, res) => {
+app.post("/trainer", authMiddleware, async (req, res) => {
   try {
     const trainers = getCollection("trainers");
     const trainer = await trainers.get(req.user.email).catch(() => null);
@@ -1352,7 +1352,7 @@ app.get("/teams/:id", async (req, res) => {
 });
 
 // Update Team (Only Captain) with Notifications
-app.put("/teams/:id", authMiddleware, async (req, res) => {
+app.post("/teams/:id", authMiddleware, async (req, res) => {
   try {
     const teams = getCollection("teams");
     const players = getCollection("players");
@@ -1501,7 +1501,7 @@ app.put("/teams/:id", authMiddleware, async (req, res) => {
 });
 
 // ❌ Delete Team (Captain Only)
-app.delete("/teams/:id", authMiddleware, async (req, res) => {
+app.post("/teams/:id", authMiddleware, async (req, res) => {
   try {
     const teams = getCollection("teams");
     const players = getCollection("players");
@@ -1599,7 +1599,7 @@ app.post("/teams/:id/request", authMiddleware, async (req, res) => {
 });
 
 // ✅ Approve/Reject Request (Captain Only) with Notification
-app.put("/teams/:id/requests/:playerId", authMiddleware, async (req, res) => {
+app.post("/teams/:id/requests/:playerId", authMiddleware, async (req, res) => {
   try {
     const teams = getCollection("teams");
     const players = getCollection("players");
@@ -1668,7 +1668,7 @@ app.put("/teams/:id/requests/:playerId", authMiddleware, async (req, res) => {
 });
 
 // ✅ Leave Team (Player Only, Captain cannot leave) with Notification
-app.delete("/teams/:id/leave", authMiddleware, async (req, res) => {
+app.post("/teams/:id/leave", authMiddleware, async (req, res) => {
   try {
     const teams = getCollection("teams");
     const players = getCollection("players");
@@ -1769,7 +1769,7 @@ app.post("/teams/:id/invite/:playerId", authMiddleware, async (req, res) => {
 });
 
 // ✅ Player Accept/Reject Team Invite with Notification
-app.put("/profile/requests/:teamId", authMiddleware, async (req, res) => {
+app.post("/profile/requests/:teamId", authMiddleware, async (req, res) => {
   try {
     const players = getCollection("players");
     const teams = getCollection("teams");
@@ -2032,7 +2032,7 @@ app.post("/trophy", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // 4️⃣ Update Trophy (Admin Only)
-app.put("/trophies/:id", authMiddleware, adminMiddleware, async (req, res) => {
+app.post("/trophies/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const trophies = getCollection("trophies");
     const existing = await trophies.get(req.params.id).catch(() => null);
@@ -2101,7 +2101,7 @@ app.put("/trophies/:id", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // 5️⃣ Delete Trophy (Admin Only)
-app.delete("/trophies/:id", authMiddleware, adminMiddleware, async (req, res) => {
+app.post("/trophies/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const trophies = getCollection("trophies");
     const existing = await trophies.get(req.params.id).catch(() => null);
@@ -2253,7 +2253,7 @@ app.post("/inventory", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // ✏️ Update Inventory
-app.put("/inventories/:id", authMiddleware, adminMiddleware, async (req, res) => {
+app.post("/inventories/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const inventories = getCollection("inventories");
     const existing = await inventories.get(req.params.id).catch(() => null);
@@ -2283,7 +2283,7 @@ app.put("/inventories/:id", authMiddleware, adminMiddleware, async (req, res) =>
 });
 
 // ❌ Delete Inventory
-app.delete("/inventories/:id", authMiddleware, adminMiddleware, async (req, res) => {
+app.post("/inventories/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const inventories = getCollection("inventories");
     const existing = await inventories.get(req.params.id).catch(() => null);
@@ -2435,7 +2435,7 @@ app.post("/match", authMiddleware, async (req, res) => {
 });
 
 // ✏️ Opponent Captain Response
-app.put("/matches/:id/response", authMiddleware, async (req, res) => {
+app.post("/matches/:id/response", authMiddleware, async (req, res) => {
   try {
     let { action, playersSelected } = req.body;
 
@@ -2563,7 +2563,7 @@ const skillValues = {
 };
 
 // 4️⃣ Finalize Match (Both captains submit first, then auto finalization)
-app.put("/matches/:id/finalize", authMiddleware, async (req, res) => {
+app.post("/matches/:id/finalize", authMiddleware, async (req, res) => {
   try {
 
 
@@ -2818,7 +2818,7 @@ app.put("/matches/:id/finalize", authMiddleware, async (req, res) => {
 });
 
 // 🗑️ Delete Match (Admin only)
-app.delete("/matches/:id", authMiddleware, adminMiddleware, async (req, res) => {
+app.post("/matches/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const matches = getCollection("matches");
     const matchId = req.params.id;
@@ -2842,7 +2842,7 @@ app.delete("/matches/:id", authMiddleware, adminMiddleware, async (req, res) => 
 });
 
 // 🗑️ Remove Player Notification (Self only)
-app.delete("/players/:email/notifications/:notifId", authMiddleware, async (req, res) => {
+app.post("/players/:email/notifications/:notifId", authMiddleware, async (req, res) => {
   try {
     const players = getCollection("players");
     const { email, notifId } = req.params;
@@ -2952,7 +2952,7 @@ app.post("/notify/:email", authMiddleware, async (req, res) => {
 });
 
 // 🧹 DELETE all notifications (Self only)
-app.delete("/players/:email/notifications", authMiddleware, async (req, res) => {
+app.post("/players/:email/notifications", authMiddleware, async (req, res) => {
   try {
     const { email } = req.params;
 
