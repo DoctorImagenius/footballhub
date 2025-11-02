@@ -3143,12 +3143,26 @@ app.get("/stats", async (req, res) => {
     const cluster = getCluster();
 
     // Queries
-    const playerQuery = `SELECT COUNT(*) AS total FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`players\``;
-    const teamQuery = `SELECT COUNT(*) AS total FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`teams\``;
-    const trainerQuery = `SELECT COUNT(*) AS total FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`trainers\``;
-    const matchQuery = `SELECT COUNT(*) AS total FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`matches\``;
+    const playerQuery = `
+      SELECT COUNT(*) AS total 
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`players\`
+    `;
+    const teamQuery = `
+      SELECT COUNT(*) AS total 
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`teams\`
+    `;
+    const trainerQuery = `
+      SELECT COUNT(*) AS total 
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`trainers\`
+    `;
+    // 🏁 Count only matches with status = "final"
+    const matchQuery = `
+      SELECT COUNT(*) AS total 
+      FROM \`${process.env.COUCHBASE_BUCKET}\`.\`${process.env.COUCHBASE_SCOPE}\`.\`matches\` m
+      WHERE m.status = "final"
+    `;
 
-    // Parallel execution for speed
+    // ⚡ Run all queries in parallel
     const [players, teams, trainers, matches] = await Promise.all([
       cluster.query(playerQuery),
       cluster.query(teamQuery),
@@ -3163,7 +3177,7 @@ app.get("/stats", async (req, res) => {
         players: players.rows[0]?.total || 0,
         teams: teams.rows[0]?.total || 0,
         trainers: trainers.rows[0]?.total || 0,
-        matches: matches.rows[0]?.total || 0,
+        matches: matches.rows[0]?.total || 0, // ✅ only "final" matches counted
       },
     });
   } catch (err) {
@@ -3174,6 +3188,7 @@ app.get("/stats", async (req, res) => {
     });
   }
 });
+
  
 // 🔔 Notification Helper Function (Hybrid)
 async function sendNotification(recipients, notif) {
