@@ -1038,7 +1038,7 @@ app.post("/trainer", authMiddleware, async (req, res) => {
 });
 
 // 3️⃣ Update Trainer Profile (Auth)
-app.post("up-/trainer", authMiddleware, async (req, res) => {
+app.post("/up-trainer", authMiddleware, async (req, res) => {
   try {
     const trainers = getCollection("trainers");
     const existing = await trainers.get(req.user.email).catch(() => null);
